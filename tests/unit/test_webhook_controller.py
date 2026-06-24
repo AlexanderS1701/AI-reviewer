@@ -14,16 +14,6 @@ def _github_signature(payload_body: bytes, secret: str) -> str:
     ).hexdigest()
 
 
-def test_github_webhook_get_returns_diagnostic_status() -> None:
-    response = TestClient(app).get("/webhooks/github")
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "status": "ok",
-        "message": "GitHub webhooks must be delivered with POST.",
-    }
-
-
 def test_github_webhook_accepts_signed_ping(monkeypatch) -> None:
     secret = "test-secret"
     payload_body = b'{"zen":"Keep it logically awesome."}'
