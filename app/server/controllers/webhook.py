@@ -8,14 +8,6 @@ from app.modules.webhook_security import verify_github_signature
 router = APIRouter()
 
 
-@router.get("/webhooks/github")
-async def github_webhook_status() -> dict:
-    return {
-        "status": "ok",
-        "message": "GitHub webhooks must be delivered with POST.",
-    }
-
-
 @router.post("/webhooks/github")
 async def github_webhook(
     request: Request,
