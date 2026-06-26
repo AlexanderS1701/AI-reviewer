@@ -1,7 +1,6 @@
 from typing import Any
 
 import httpx
-from loguru import logger
 
 from app.config import settings
 
@@ -26,7 +25,7 @@ class GitHubClient:
 
         async with httpx.AsyncClient(timeout=20) as client:
             response = await client.get(url, headers=self.headers)
-            self._raise_for_status(response)
+            response.raise_for_status()
             return response.json()
 
     async def create_pull_request_comment(
@@ -45,18 +44,5 @@ class GitHubClient:
                 headers=self.headers,
                 json={"body": body},
             )
-            self._raise_for_status(response)
-
-    def _raise_for_status(self, response: httpx.Response) -> None:
-        try:
             response.raise_for_status()
-        except httpx.HTTPStatusError:
-            logger.error(
-                "GitHub API request failed: method={}, url={}, status_code={}, response={}",
-                response.request.method,
-                response.request.url,
-                response.status_code,
-                response.text,
-            )
-            raise
             
