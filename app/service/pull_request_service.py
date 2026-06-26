@@ -2,6 +2,7 @@ from loguru import logger
 
 from app.adapters.github_client import GitHubClient
 from app.dto.github import PullRequestContext
+from app.modules.diff_parser import prepare_diff_for_review
 
 
 class PullRequestService:
@@ -15,19 +16,24 @@ class PullRequestService:
             pull_request_number=context.pull_request_number,
         )
 
-        changed_files = [
-            file["filename"]
-            for file in files
-        ]
+        prepared_diff = prepare_diff_for_review(files)
 
         logger.info(
-            "Pull request files fetched: repository={}, pr_number={}, files_count={}",
+            "Pull request diff prepared: repository={}, pr_number={}, files_count={}, skipped_files_count={}, is_truncated={}",
             context.repository_full_name,
             context.pull_request_number,
-            len(changed_files),
+            prepared_diff.files_count,
+            prepared_diff.skipped_files_count,
+            prepared_diff.is_truncated,
         )
 
-        comment = self._build_debug_comment(context, changed_files)
+        comment = self._build_debug_comment(
+            context=context,
+            prepared_diff_text=prepared_diff.to_text(),
+            files_count=prepared_diff.files_count,
+            skipped_files_count=prepared_diff.skipped_files_count,
+            is_truncated=prepared_diff.is_truncated,
+        )
 
         await self.github_client.create_pull_request_comment(
             owner=context.owner,
@@ -38,20 +44,29 @@ class PullRequestService:
 
     def _build_debug_comment(
         self,
+        *,
         context: PullRequestContext,
-        changed_files: list[str],
+        prepared_diff_text: str,
+        files_count: int,
+        skipped_files_count: int,
+        is_truncated: bool,
     ) -> str:
-        files_block = "\n".join(f"- `{file}`" for file in changed_files)
-
         return f"""## AI Reviewer
 
-Webhook received successfully.
+Diff prepared successfully.
 
 **Repository:** `{context.repository_full_name}`  
 **Pull request:** `#{context.pull_request_number}`  
 **Head SHA:** `{context.head_sha}`
 
-### Changed files
+**Reviewable files:** `{files_count}`  
+**Skipped files:** `{skipped_files_count}`  
+**Diff truncated:** `{is_truncated}`
 
-{files_block}
+<details>
+<summary>Prepared diff</summary>
+
+{prepared_diff_text}
+
+</details>
 """
