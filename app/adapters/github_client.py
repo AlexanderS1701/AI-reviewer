@@ -45,4 +45,4 @@ class GitHubClient:
                 json={"body": body},
             )
             response.raise_for_status()
-            
+

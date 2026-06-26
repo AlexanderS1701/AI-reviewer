@@ -19,7 +19,8 @@ class PullRequestService:
         prepared_diff = prepare_diff_for_review(files)
 
         logger.info(
-            "Pull request diff prepared: repository={}, pr_number={}, files_count={}, skipped_files_count={}, is_truncated={}",
+            "Pull request diff prepared: repository={}, pr_number={}, "
+            "files_count={}, skipped_files_count={}, is_truncated={}",
             context.repository_full_name,
             context.pull_request_number,
             prepared_diff.files_count,
@@ -55,12 +56,12 @@ class PullRequestService:
 
 Diff prepared successfully.
 
-**Repository:** `{context.repository_full_name}`  
-**Pull request:** `#{context.pull_request_number}`  
+**Repository:** `{context.repository_full_name}`
+**Pull request:** `#{context.pull_request_number}`
 **Head SHA:** `{context.head_sha}`
 
-**Reviewable files:** `{files_count}`  
-**Skipped files:** `{skipped_files_count}`  
+**Reviewable files:** `{files_count}`
+**Skipped files:** `{skipped_files_count}`
 **Diff truncated:** `{is_truncated}`
 
 <details>
